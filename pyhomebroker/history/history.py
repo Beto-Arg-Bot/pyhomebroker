@@ -92,8 +92,10 @@ class History:
             symbol.upper(),
             self.__convert_datetime_to_epoch(from_date),
             self.__convert_datetime_to_epoch(to_date))
-
-        resp = await rq.get(url, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
+        
+        resp = None
+        async with rq.AsyncClient(proxies=self._proxies) as sess:
+            resp = await sess.get(url, headers=headers, cookies=self._auth.cookies)
         resp.raise_for_status()
         resp = resp.json()
 
@@ -147,8 +149,9 @@ class History:
             symbol.upper(),
             self.__convert_datetime_to_epoch(from_date),
             self.__convert_datetime_to_epoch(to_date))
-
-        resp = await rq.get(url, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
+        resp = None
+        async with rq.AsyncClient(proxies=self._proxies) as sess:
+            resp = await sess.get(url, headers=headers, cookies=self._auth.cookies)
         resp.raise_for_status()
         resp = resp.json()
 
