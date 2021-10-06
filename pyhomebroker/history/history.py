@@ -19,13 +19,14 @@
 # limitations under the License.
 #
 
-from ..common import user_agent
-
 import datetime
 
-import requests as rq
-import pandas as pd
+import httpx as rq
 import numpy as np
+import pandas as pd
+
+from ..common import user_agent
+
 
 class History:
 
@@ -56,7 +57,7 @@ class History:
 ########################
 #### PUBLIC METHODS ####
 ########################
-    def get_daily_history(self, symbol, from_date, to_date):
+    async def get_daily_history(self, symbol, from_date, to_date):
         """
         Returns the historical quotes of the specified ticker narroweed by the date.
 
@@ -92,7 +93,7 @@ class History:
             self.__convert_datetime_to_epoch(from_date),
             self.__convert_datetime_to_epoch(to_date))
 
-        resp = rq.get(url, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
+        resp = await rq.get(url, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
         resp.raise_for_status()
         resp = resp.json()
 
@@ -102,7 +103,7 @@ class History:
 
         return df
 
-    def get_intraday_history(self, symbol, from_date=None, to_date=None):
+    async def get_intraday_history(self, symbol, from_date=None, to_date=None):
         """
         Returns the historical quotes of the specified ticker narroweed by the date.
 
@@ -147,7 +148,7 @@ class History:
             self.__convert_datetime_to_epoch(from_date),
             self.__convert_datetime_to_epoch(to_date))
 
-        resp = rq.get(url, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
+        resp = await rq.get(url, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
         resp.raise_for_status()
         resp = resp.json()
 

@@ -19,13 +19,14 @@
 # limitations under the License.
 #
 
-from .common import user_agent, SessionException
+import urllib.parse
 
+import httpx as rq
+import pandas as pd
 from pyquery import PyQuery as pq
 
-import requests as rq
-import pandas as pd
-import urllib.parse
+from .common import SessionException, user_agent
+
 
 class HomeBrokerSession:
 
@@ -58,7 +59,7 @@ class HomeBrokerSession:
 ########################
 #### PUBLIC METHODS ####
 ########################
-    def login(self, dni, user, password, raise_exception=False):
+    async def login(self, dni, user, password, raise_exception=False):
         """
         This method authenticates the user in the home broker platform.
 
@@ -101,7 +102,7 @@ class HomeBrokerSession:
                 'Password': password}
             payload = urllib.parse.urlencode(payload)
 
-            with rq.Session() as sess:
+            with rq.Client() as sess:
                 response = sess.post(url, data=payload, headers=headers, proxies=self._proxies)
                 response.raise_for_status()
 
@@ -115,7 +116,7 @@ class HomeBrokerSession:
                     raise SessionException('Session cannot be created.  Check the entered information and try again.')
 
                 self.is_user_logged_in = True
-                self.cookies = rq.utils.dict_from_cookiejar(sess.cookies)
+                self.cookies =  rq.utils.dict_from_cookiejar(sess.cookies)
         except Exception as ex:
             self.is_user_logged_in = False
             self.cookies = {}
@@ -136,10 +137,10 @@ class HomeBrokerSession:
 #########################
 #### PRIVATE METHODS ####
 #########################
-    def __get_ipaddress(self):
+    async def __get_ipaddress(self):
 
         if not self.__ipaddress:
-           data = rq.get('https://api.ipify.org/?format=json&callback=get_ip', proxies=self._proxies)
+           data = await rq.get('https://api.ipify.org/?format=json&callback=get_ip', proxies=self._proxies)
            self.__ipaddress = (data.json()['ip'])
 
         return self.__ipaddress
