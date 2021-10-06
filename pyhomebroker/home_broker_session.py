@@ -102,8 +102,8 @@ class HomeBrokerSession:
                 'Password': password}
             payload = urllib.parse.urlencode(payload)
 
-            with rq.Client() as sess:
-                response = sess.post(url, data=payload, headers=headers, proxies=self._proxies)
+            with rq.Client( proxies=self._proxies) as sess:
+                response = sess.post(url, data=payload, headers=headers)
                 response.raise_for_status()
 
                 doc = pq(response.text)
