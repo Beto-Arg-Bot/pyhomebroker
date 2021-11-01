@@ -10,7 +10,7 @@ async def test():
     broker=HomeBroker(brokerId)
     await broker.auth.login(dni=dni,user=user,password=passw,raise_exception=True)
     settlement=broker.online.get_settlement_for_request('spot')
-    response=broker.online._scrapping.get_asset('ggal',settlement)
+    response=await broker.online._scrapping.get_asset('ggal',settlement)
     responseString=str(response)
     responseString=responseString.replace("'",'"')
     responseString=responseString.replace("None",'null')
