@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 #a file used for testing purposes
-./x.py
+x.py
