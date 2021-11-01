@@ -254,7 +254,7 @@ class OnlineScrapping(OnlineCore):
 
         return response
 
-    def __get_asset(self, symbol, settlement):
+    def get_asset(self, symbol, settlement):
 
         if not self._auth.is_user_logged_in:
             raise SessionException('User is not logged in')

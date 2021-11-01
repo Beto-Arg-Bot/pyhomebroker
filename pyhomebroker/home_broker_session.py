@@ -118,8 +118,7 @@ class HomeBrokerSession:
                     raise SessionException('Session cannot be created.  Check the entered information and try again.')
 
                 self.is_user_logged_in = True
-                return sess.cookies
-                # self.cookies =  rq.utils.dict_from_cookiejar(sess.cookies)
+                self.cookies =  dict_from_cookiejar(sess.cookies)
         except Exception as ex:
             self.is_user_logged_in = False
             self.cookies = {}
@@ -148,3 +147,9 @@ class HomeBrokerSession:
                 self.__ipaddress = (data.json()['ip'])
 
         return self.__ipaddress
+
+def dict_from_cookiejar(cj):
+    pojo={}
+    for c in cj:
+        pojo[c]=cj[c]
+    return pojo
