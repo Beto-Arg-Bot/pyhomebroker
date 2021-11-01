@@ -11,8 +11,9 @@ async def test():
     cookies=await broker.auth.login(dni=dni,user=user,password=passw,raise_exception=True)
     # response=broker.online._scrapping.get_asset('ggal','')
     # print(response)
-    print(type(cookies))
-    print(cookies)
+    # print(type(cookies))
+    # print(cookies)
+    for c in cookies: print(c)
 
 loop=asyncio.get_event_loop()
 loop.run_until_complete(test())
