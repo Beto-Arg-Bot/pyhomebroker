@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 
 from ..common import user_agent
+from ..common.exceptions import SessionException
 
 
 class History:
