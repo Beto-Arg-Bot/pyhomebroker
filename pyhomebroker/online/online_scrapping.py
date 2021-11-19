@@ -226,7 +226,7 @@ class OnlineScrapping(OnlineCore):
 
         return response
 
-    def __get_predefined_portfolio(self, board, settlement=None):
+    async def get_predefined_portfolio(self, board, settlement=None):
 
         if not self._auth.is_user_logged_in:
             raise SessionException('User is not logged in')
@@ -244,10 +244,11 @@ class OnlineScrapping(OnlineCore):
             'term': settlement or ''
         }
 
-        response = rq.post(url, json=payload, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
-        response.raise_for_status()
-
-        response = response.json()
+        response =None
+        async with rq.AsyncClient(proxies=self._proxies) as r:
+            response = rq.post(url, json=payload, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
+            response.raise_for_status()
+            response = response.json()
 
         if not response['Success']:
             raise ServerException(response['Error']['Descripcion'] or 'Unknown Error')
