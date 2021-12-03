@@ -19,13 +19,14 @@
 # limitations under the License.
 #
 
-from .common import user_agent, SessionException
+import urllib.parse
 
+import httpx as rq
+import pandas as pd
 from pyquery import PyQuery as pq
 
-import requests as rq
-import pandas as pd
-import urllib.parse
+from .common import SessionException, user_agent
+
 
 class HomeBrokerSession:
 
@@ -58,7 +59,7 @@ class HomeBrokerSession:
 ########################
 #### PUBLIC METHODS ####
 ########################
-    def login(self, dni, user, password, raise_exception=False):
+    async def login(self, dni, user, password, raise_exception=False):
         """
         This method authenticates the user in the home broker platform.
 
@@ -94,15 +95,17 @@ class HomeBrokerSession:
 
             url = '{}/Login/Ingresar'.format(self.broker['page'])
 
+            ip = await self.__get_ipaddress()
+            
             payload = {
-                'IpAddress': self.__get_ipaddress(),
+                'IpAddress': ip,
                 'Dni': dni,
                 'Usuario': user,
                 'Password': password}
             payload = urllib.parse.urlencode(payload)
 
-            with rq.Session() as sess:
-                response = sess.post(url, data=payload, headers=headers, proxies=self._proxies)
+            async with rq.AsyncClient(proxies=self._proxies) as sess:
+                response = await sess.post(url, data=payload, headers=headers)
                 response.raise_for_status()
 
                 doc = pq(response.text)
@@ -115,7 +118,7 @@ class HomeBrokerSession:
                     raise SessionException('Session cannot be created.  Check the entered information and try again.')
 
                 self.is_user_logged_in = True
-                self.cookies = rq.utils.dict_from_cookiejar(sess.cookies)
+                self.cookies =  dict_from_cookiejar(sess.cookies)
         except Exception as ex:
             self.is_user_logged_in = False
             self.cookies = {}
@@ -136,10 +139,17 @@ class HomeBrokerSession:
 #########################
 #### PRIVATE METHODS ####
 #########################
-    def __get_ipaddress(self):
+    async def __get_ipaddress(self):
 
         if not self.__ipaddress:
-           data = rq.get('https://api.ipify.org/?format=json&callback=get_ip', proxies=self._proxies)
-           self.__ipaddress = (data.json()['ip'])
+            async with rq.AsyncClient(proxies=self._proxies) as sess: 
+                data = await sess.get('https://api.ipify.org/?format=json&callback=get_ip')
+                self.__ipaddress = (data.json()['ip'])
 
         return self.__ipaddress
+
+def dict_from_cookiejar(cj):
+    pojo={}
+    for c in cj:
+        pojo[c]=cj[c]
+    return pojo

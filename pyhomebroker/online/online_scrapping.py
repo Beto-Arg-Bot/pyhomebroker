@@ -22,7 +22,7 @@
 from ..common import user_agent, DataException, SessionException, ServerException
 from .online_core import OnlineCore
 
-import requests as rq
+import httpx as rq
 import pandas as pd
 import numpy as np
 
@@ -226,7 +226,7 @@ class OnlineScrapping(OnlineCore):
 
         return response
 
-    def __get_predefined_portfolio(self, board, settlement=None):
+    async def get_predefined_portfolio(self, board, settlement=None):
 
         if not self._auth.is_user_logged_in:
             raise SessionException('User is not logged in')
@@ -244,17 +244,18 @@ class OnlineScrapping(OnlineCore):
             'term': settlement or ''
         }
 
-        response = rq.post(url, json=payload, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
-        response.raise_for_status()
-
-        response = response.json()
+        response =None
+        async with rq.AsyncClient(proxies=self._proxies) as r:
+            response = rq.post(url, json=payload, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
+            response.raise_for_status()
+            response = response.json()
 
         if not response['Success']:
             raise ServerException(response['Error']['Descripcion'] or 'Unknown Error')
 
         return response
 
-    def __get_asset(self, symbol, settlement):
+    async def get_asset(self, symbol, settlement):
 
         if not self._auth.is_user_logged_in:
             raise SessionException('User is not logged in')
@@ -272,10 +273,11 @@ class OnlineScrapping(OnlineCore):
             'term': settlement
         }
 
-        response = rq.post(url, json=payload, headers=headers, cookies=self._auth.cookies, proxies=self._proxies)
-        response.raise_for_status()
-
-        response = response.json()
+        response =None
+        async with rq.AsyncClient(proxies=self._proxies) as r:
+            response=await r.post(url, json=payload, headers=headers, cookies=self._auth.cookies)
+            response.raise_for_status()
+            response = response.json()
 
         if not response['Success']:
             raise ServerException(response['Error']['Descripcion'] or 'Unknown Error')
